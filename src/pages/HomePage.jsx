@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import Chatbox from '../components/Chatbox';
 
 export default function HomePage() {
   return (
@@ -26,6 +27,10 @@ export default function HomePage() {
           Protected page →
         </Link>
       </div>
+
+     <Chatbox roomId={1} userId={1} displayName="Test User" />
+
     </section>
+
   );
 }
