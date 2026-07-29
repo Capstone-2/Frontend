@@ -35,7 +35,8 @@ function App() {
       try {
         const token = await getAccessTokenSilently();
         const dbUser = await syncUser(token, {
-          username: auth0User.nickname || auth0User.email?.split('@')[0],
+          name: auth0User.name || auth0User.nickname || auth0User.email?.split("@")[0] || "Student",
+          email: auth0User.email,
         });
         setCurrentUser(dbUser);
       } catch (err) {
