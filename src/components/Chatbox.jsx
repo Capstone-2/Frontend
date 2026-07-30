@@ -38,7 +38,6 @@ export default function Chatbox({ roomId, userId, displayName }) {
     async function connectAuthenticatedSocket() {
       try {
         const token = await getAccessTokenSilently()
-        console.log(token)
         if (canceled) {
           return
         }
