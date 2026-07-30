@@ -9,6 +9,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ProtectedPage from './pages/ProtectedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { syncUser } from './api/auth';
+import CreateRoomPage from './pages/CreateRoomPage';
 import { CurrentUserContext } from './context/CurrentUserContext';
 
 // App maps every URL to a page. It ALSO handles the auth "sync": once Auth0
@@ -58,6 +59,7 @@ function App() {
           <Route path='/' element={<HomePage />} />
           <Route path='/tasks' element={<TasksPage />} />
           <Route path='/tasks/:id' element={<TaskDetailPage />} />
+          <Route path='/create' element={<CreateRoomPage/>}/>
           {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
           <Route
             path='/protected'
