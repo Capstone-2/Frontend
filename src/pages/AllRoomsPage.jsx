@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 /* link: won't reload the page, <a>tag will reload
 useNavigate: manually redirect user to other pages
 useEffect: a function to load once */
-
-const navigete = useNavigate();
 
 export default function AllRooms() {
   //state
@@ -17,7 +15,7 @@ export default function AllRooms() {
   const [password, setPassword] = useState("0000");
   const [error, serError] = useState(null);
 
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   //load all rooms
   //runs when "all rooms" button clicked
