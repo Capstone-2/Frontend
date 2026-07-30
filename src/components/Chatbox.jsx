@@ -49,7 +49,7 @@ export default function Chatbox({ roomId, userId, displayName }) {
         socket.on("chat-error", handleChatError);
         socket.on("connect", handleConnect)
         socket.on("receive-message", handleRecievedMessage)
-        socket.on("connect-error", handleConnectError)
+        socket.on("connect_error", handleConnectError)
 
         socket.connect()  // Start authenticated connection
 
@@ -61,9 +61,6 @@ export default function Chatbox({ roomId, userId, displayName }) {
 
     connectAuthenticatedSocket()
 
-    socket.connect();
-    socket.emit("join-room", { roomId, /*userId, displayName*/ });
-
     return () => {
       canceled = true
       if (socket.connected) {
@@ -73,7 +70,7 @@ export default function Chatbox({ roomId, userId, displayName }) {
       socket.off("connect", handleConnect);
       socket.off("receive-message", handleRecievedMessage);
       socket.off("chat-error", handleChatError);
-      socket.off("connect-error", handleConnectError)
+      socket.off("connect_error", handleConnectError)
       socket.disconnect();
     };
   }, [roomId, isAuthenticated, isLoading, getAccessTokenSilently]);
