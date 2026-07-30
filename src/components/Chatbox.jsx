@@ -1,31 +1,89 @@
 // components/Chatbox.jsx — live chat for a study room.
 // Expects roomId, userId, displayName as props from whoever builds RoomPage.
+import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { socket } from "../api/socket";
 
 export default function Chatbox({ roomId, userId, displayName }) {
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
+  const [socketError, setSocketError] = useState("");
+  const {isAuthenticated, isLoading, getAccessTokenSilently} = useAuth0();
 
   useEffect(() => {
-    socket.connect();
-    socket.emit("join-room", { roomId, userId, displayName });
+    if (isLoading || !isAuthenticated) { return }
+    
+    let canceled = false;
 
-    function onReceiveMessage(msg) {
-      setMessages((prev) => [...prev, msg]);
+    function handleConnect() {
+      console.log("Socket connected:", socket.id);
+      console.log("Joining Room:", roomId)
+      socket.emit("join-room", { roomId }); // userId & displayName no longer need to be sent!
     }
-    socket.on("receive-message", onReceiveMessage);
+
+    function handleRecievedMessage(msg) {
+      console.log("Received message:", msg);
+      setMessages((prev) => [...prev, msg])
+    }
+
+    function handleConnectError(error) {
+      console.error("Socket connection failed:", error.message)
+      setSocketError(error.message)
+    }
+
+    function handleChatError(error) {
+      console.error("Chat error:", error);
+    }
+
+    async function connectAuthenticatedSocket() {
+      try {
+        const token = await getAccessTokenSilently()
+        console.log(token)
+        if (canceled) {
+          return
+        }
+
+        // Add auth token to socket
+        socket.auth = { token: token }
+
+        // Add event listeners
+        socket.on("chat-error", handleChatError);
+        socket.on("connect", handleConnect)
+        socket.on("receive-message", handleRecievedMessage)
+        socket.on("connect-error", handleConnectError)
+
+        socket.connect()  // Start authenticated connection
+
+      } catch(error) {
+        console.error("Could not get socket token:", error.message)
+        setSocketError("Could not authenticate chat.")
+      }
+    }
+
+    connectAuthenticatedSocket()
+
+    socket.connect();
+    socket.emit("join-room", { roomId, /*userId, displayName*/ });
 
     return () => {
-      socket.emit("leave-room", { roomId });
-      socket.off("receive-message", onReceiveMessage);
+      canceled = true
+      if (socket.connected) {
+        socket.emit("leave-room")
+      }
+
+      socket.off("connect", handleConnect);
+      socket.off("receive-message", handleRecievedMessage);
+      socket.off("chat-error", handleChatError);
+      socket.off("connect-error", handleConnectError)
       socket.disconnect();
     };
-  }, [roomId]);
+  }, [roomId, isAuthenticated, isLoading, getAccessTokenSilently]);
 
   function sendMessage() {
     if (!draft.trim()) return;
-    socket.emit("send-message", { roomId, text: draft });
+    const cleanText = draft.trim()
+    console.log("Sending message:", cleanText);
+    socket.emit("send-message", { text: cleanText });
     setDraft("");
   }
 
