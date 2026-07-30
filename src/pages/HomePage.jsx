@@ -28,7 +28,7 @@ export default function HomePage() {
         </Link>
       </div>
 
-     <Chatbox roomId={1} userId={1} displayName="Test User" />
+     <Chatbox roomId={2} />
 
     </section>
 
