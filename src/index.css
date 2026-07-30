@@ -107,3 +107,30 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* All Rooms Page styles */
+
+.rooms{
+  display: flex;
+  flex-wrap:wrap;
+  gap: 20px;
+  padding:20px;
+}
+
+.room-card{
+  background:white;
+  width: 45%;
+  border-radius: 10px;
+  box-shadow:0 2px 6px hsla(276, 56%, 49%, 0.102);
+}
+
+.room-card:hover{
+  text-decoration:underline;
+}
+
+.room-image{
+  width:100%; /*stretches to fill its parent (room-card) */
+  height:180px;/* forcesimage into the same box */
+  object-fit: cover; /* crop each photo to fill, other than squish/stretch */
+  border-radius: 10px 10px 0 0;  /* rounds only top corners */
+}

@@ -1,17 +1,18 @@
-import { Routes, Route } from 'react-router';
-import { useEffect, useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import TasksPage from './pages/TasksPage';
-import TaskDetailPage from './pages/TaskDetailPage';
-import NotFoundPage from './pages/NotFoundPage';
-import ProtectedPage from './pages/ProtectedPage';
-import ProtectedRoute from './components/ProtectedRoute';
-import { syncUser } from './api/auth';
+import { Routes, Route } from "react-router";
+import { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import Layout from "./components/Layout";
+import HomePage from "./pages/HomePage";
+import TasksPage from "./pages/TasksPage";
+import TaskDetailPage from "./pages/TaskDetailPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedPage from "./pages/ProtectedPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { syncUser } from "./api/auth";
 import CreateRoomPage from './pages/CreateRoomPage';
 import RoomPage from './pages/RoomPage';
 import { CurrentUserContext } from './context/CurrentUserContext';
+import AllRoomsPage from "./pages/AllRoomsPage";
 
 // App maps every URL to a page. It ALSO handles the auth "sync": once Auth0
 // says we're logged in, we make sure the user exists in our own database.
@@ -41,12 +42,16 @@ function App() {
       try {
         const token = await getAccessTokenSilently();
         const dbUser = await syncUser(token, {
-          name: auth0User.name || auth0User.nickname || auth0User.email?.split("@")[0] || "Student",
+          name:
+            auth0User.name ||
+            auth0User.nickname ||
+            auth0User.email?.split("@")[0] ||
+            "Student",
           email: auth0User.email,
         });
         setCurrentUser(dbUser);
       } catch (err) {
-        console.error('Could not sync user:', err.message);
+        console.error("Could not sync user:", err.message);
       }
     };
 
@@ -57,7 +62,7 @@ function App() {
     <CurrentUserContext.Provider value={{currentUser, setCurrentUser}}>
       <Routes>
         <Route element={<Layout />}>
-          <Route path='/' element={<HomePage />} />
+          <Route path="/" element={<AllRoomsPage />} />
           <Route path='/tasks' element={<TasksPage />} />
           <Route path='/tasks/:id' element={<TaskDetailPage />} />
           <Route path='/create' element={<CreateRoomPage/>}/>
