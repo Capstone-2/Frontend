@@ -9,6 +9,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedPage from "./pages/ProtectedPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { syncUser } from "./api/auth";
+import CreateRoomPage from './pages/CreateRoomPage';
+import RoomPage from './pages/RoomPage';
+import { CurrentUserContext } from './context/CurrentUserContext';
 import AllRoomsPage from "./pages/AllRoomsPage";
 
 // App maps every URL to a page. It ALSO handles the auth "sync": once Auth0
@@ -30,7 +33,10 @@ function App() {
   // CREATES the user the first time and RETURNS the existing row after that —
   // exactly the "store them if they don't already exist" behavior we want.
   useEffect(() => {
-    if (!isAuthenticated || !auth0User) return;
+    if (!isAuthenticated || !auth0User) {
+      setCurrentUser(null) 
+      return;
+    }
 
     const sync = async () => {
       try {
@@ -53,26 +59,27 @@ function App() {
   }, [isAuthenticated, auth0User, getAccessTokenSilently]);
 
   return (
-    /* wrap all route in routes, able to navigate */
-
-    <Routes>
-      <Route element={<Layout />}>
-        {/* <Route path='/' element={<HomePage />} /> */}
-        <Route path="/" element={<AllRoomsPage />} />
-        <Route path="/tasks" element={<TasksPage />} />
-        <Route path="/tasks/:id" element={<TaskDetailPage />} />
-        {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
-        <Route
-          path="/protected"
-          element={
-            <ProtectedRoute>
-              <ProtectedPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+    <CurrentUserContext.Provider value={{currentUser, setCurrentUser}}>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<AllRoomsPage />} />
+          <Route path='/tasks' element={<TasksPage />} />
+          <Route path='/tasks/:id' element={<TaskDetailPage />} />
+          <Route path='/create' element={<CreateRoomPage/>}/>
+          <Route path='/room' element={<RoomPage/>}/>
+          {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
+          <Route
+            path='/protected'
+            element={
+              <ProtectedRoute>
+                <ProtectedPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path='*' element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </CurrentUserContext.Provider> 
   );
 }
 
