@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router';
+import { NavLink } from "react-router";
+import { useAuth0 } from "@auth0/auth0-react";
 
 // NavLink is like an <a> tag but for client-side routing: it navigates without
 // a full page reload, and it tells us when its route is active so we can style it.
@@ -9,25 +10,25 @@ import { NavLink } from 'react-router';
 export default function Navbar({ user, onLogout }) {
   const linkClass = ({ isActive }) =>
     `px-3 py-2 rounded-md text-sm font-medium ${
-      isActive ? 'text-(--accent)' : 'hover:text-(--text-h)'
+      isActive ? "text-[var(--accent)]" : "hover:text-[var(--text-h)]"
     }`;
 
   return (
-    <header className='border-b border-(--border)'>
-      <nav className='mx-auto flex max-w-3xl items-center gap-2 px-4 py-3'>
+    <header className="border-b border-(--border)">
+      <nav className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3">
         <NavLink
-          to='/'
-          className='mr-auto text-lg font-semibold text-(--text-h)'
+          to="/"
+          className="mr-auto text-lg font-semibold text-(--text-h)"
         >
-          Capstone
+          📚Studying Room
         </NavLink>
 
         {/* `end` makes "Home" active only on "/" exactly, not on every route. */}
-        <NavLink to='/' end className={linkClass}>
+        <NavLink to="/" end className={linkClass}>
           Home
         </NavLink>
-        <NavLink to='/tasks' className={linkClass}>
-          Tasks
+        <NavLink to="/tasks" className={linkClass}>
+          Profile
         </NavLink>
 
         {/* Only show the protected link once someone is logged in. */}

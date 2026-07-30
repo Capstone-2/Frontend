@@ -1,17 +1,20 @@
-import { Routes, Route, useNavigate } from 'react-router';
-import { useEffect, useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import TasksPage from './pages/TasksPage';
-import TaskDetailPage from './pages/TaskDetailPage';
-import NotFoundPage from './pages/NotFoundPage';
-import ProtectedPage from './pages/ProtectedPage';
-import ProtectedRoute from './components/ProtectedRoute';
+import { Routes, Route, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import Layout from "./components/Layout";
+import HomePage from "./pages/HomePage";
+import TasksPage from "./pages/TasksPage";
+import TaskDetailPage from "./pages/TaskDetailPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedPage from "./pages/ProtectedPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { getMe, syncUser, logoutRequest } from './api/auth';
 import LoginPage from './pages/LoginPage'
 import SignUpPage from './pages/SignUpPage'
-import { getMe, syncUser, logoutRequest } from './api/auth';
+import CreateRoomPage from './pages/CreateRoomPage';
+import RoomPage from './pages/RoomPage';
 import { CurrentUserContext } from './context/CurrentUserContext';
+import AllRoomsPage from "./pages/AllRoomsPage";
 
 // App does two things:
 //   1. maps every URL to a page
@@ -85,7 +88,11 @@ function App() {
       try {
         const token = await getAccessTokenSilently();
         const dbUser = await syncUser(token, {
-          name: auth0User.name || auth0User.nickname || auth0User.email?.split("@")[0] || "Student",
+          name:
+            auth0User.name ||
+            auth0User.nickname ||
+            auth0User.email?.split("@")[0] ||
+            "Student",
           email: auth0User.email,
         });
         setUser(dbUser);
@@ -126,13 +133,11 @@ function App() {
     <CurrentUserContext.Provider value={{user, setUser}}>
       <Routes>
         <Route element={<Layout user={user} onLogout={handleLogout} authError={authError} />}>
-          <Route path='/' element={<HomePage />} />
-
+          <Route path="/" element={<AllRoomsPage />} />
           <Route path='/login' element={<LoginPage setUser={setUser} />} />
           <Route path='/signup' element={<SignUpPage setUser={setUser} />} />
-
-          <Route path='/tasks' element={<TasksPage />} />
-          <Route path='/tasks/:id' element={<TaskDetailPage />} />
+          <Route path='/create' element={<CreateRoomPage/>}/>
+          <Route path='/room' element={<RoomPage/>}/>
           {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
 
           <Route
