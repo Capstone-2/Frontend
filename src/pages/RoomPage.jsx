@@ -42,6 +42,23 @@ function RoomPage(){
                     />
                 </div>
             </div>
+            
+            <div className="right-panel">
+                <h2>Chat</h2>
+
+                <div className="chat-messages">
+                    <p>User 1: Ready to Study?</p>
+                    <p>User 2: Yeah</p>
+                </div>
+                <Chatbox roomId={roomId}/>
+
+                <input
+                type="text"
+                placeholder="Type your message..." 
+                />
+
+                <button>Send</button>
+            </div>
         </div>
     );
 }

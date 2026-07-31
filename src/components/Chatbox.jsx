@@ -3,15 +3,24 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { socket } from "../api/socket";
+import { getRoomMessages } from "../api/rooms";
+import { useCurrentUser } from "../context/CurrentUserContext";
 
-export default function Chatbox({ roomId, userId, displayName }) {
+export default function Chatbox({ roomId }) {
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [socketError, setSocketError] = useState("");
-  const {isAuthenticated, isLoading, getAccessTokenSilently} = useAuth0();
+  const {user} = useCurrentUser();
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  const {
+    isAuthenticated: isAuth0User,
+    isLoading: isAuth0Loading,
+    getAccessTokenSilently,
+  } = useAuth0();
 
   useEffect(() => {
-    if (isLoading || !isAuthenticated) { return }
+    if (!user || isAuth0Loading) { return }
     
     let canceled = false;
 
@@ -21,9 +30,17 @@ export default function Chatbox({ roomId, userId, displayName }) {
       socket.emit("join-room", { roomId }); // userId & displayName no longer need to be sent!
     }
 
-    function handleRecievedMessage(msg) {
+    function handleReceivedMessage(msg) {
       console.log("Received message:", msg);
-      setMessages((prev) => [...prev, msg])
+
+      setMessages((prev) => {
+        const alreadyExists = prev.some((existingMsg) => existingMsg.id === msg.id);
+        if (alreadyExists) {
+          return prev;
+        }
+
+        return [...prev, msg];
+      })
     }
 
     function handleConnectError(error) {
@@ -37,18 +54,45 @@ export default function Chatbox({ roomId, userId, displayName }) {
 
     async function connectAuthenticatedSocket() {
       try {
-        const token = await getAccessTokenSilently()
+        let token = null;
+        if (isAuth0User) {
+          token = await getAccessTokenSilently();
+        }
+
         if (canceled) {
           return
         }
 
+        setIsLoadingHistory(true);
+
+        try {
+          const chatHistory = await getRoomMessages(roomId, token);
+          if (!canceled) {
+            const normalizedHistory = chatHistory.map(normalizeHistoryMessage);
+            setMessages(normalizedHistory);
+          }
+        } catch (error) {
+          console.error("Could not load chat history:", error.message);
+          if (!canceled) {
+            setSocketError("Live chat is available, but previous messages could not be loaded.");
+          }
+        } finally {
+          if (!canceled) {
+            setIsLoadingHistory(false);
+          }
+        }
+
+        if (canceled) {
+          return;
+        }
+
         // Add auth token to socket
-        socket.auth = { token: token }
+        socket.auth = token ? {token} : {};
 
         // Add event listeners
         socket.on("chat-error", handleChatError);
         socket.on("connect", handleConnect)
-        socket.on("receive-message", handleRecievedMessage)
+        socket.on("receive-message", handleReceivedMessage)
         socket.on("connect_error", handleConnectError)
 
         socket.connect()  // Start authenticated connection
@@ -68,12 +112,23 @@ export default function Chatbox({ roomId, userId, displayName }) {
       }
 
       socket.off("connect", handleConnect);
-      socket.off("receive-message", handleRecievedMessage);
+      socket.off("receive-message", handleReceivedMessage);
       socket.off("chat-error", handleChatError);
       socket.off("connect_error", handleConnectError)
       socket.disconnect();
     };
-  }, [roomId, isAuthenticated, isLoading, getAccessTokenSilently]);
+  }, [roomId, user, isAuth0User, isAuth0Loading, getAccessTokenSilently]);
+
+  function normalizeHistoryMessage(message) {
+    return {
+      id: message.id,
+      userId: message.userId,
+      roomId: message.roomId,
+      displayName: message.User?.displayName || message.User?.username || "Unknown user",
+      text: message.text,
+      sentAt: message.createdAt,
+    };
+  }
 
   function sendMessage() {
     if (!draft.trim()) return;
@@ -86,15 +141,24 @@ export default function Chatbox({ roomId, userId, displayName }) {
   return (
     <div className='mx-auto max-w-md rounded-md border border-(--border) p-4 text-left'>
       <div className='mb-3 max-h-60 space-y-1 overflow-y-auto'>
-        {messages.length === 0 && (
-          <p className='text-sm text-(--text-h)'>No messages yet — say hi.</p>
-        )}
-        {messages.map((m, i) => (
-          <p key={i} className='text-sm'>
-            <strong>{m.displayName}:</strong> {m.text}
+        {isLoadingHistory ? (
+          <p className="text-sm text-(--text-h)"> Loading messages... </p>
+        ) : messages.length === 0 ? (
+          <p className="text-sm text-(--text-h)"> No messages yet — say hi. </p>
+        ) : null}
+        {messages.map((message) => (
+          <p key={message.id} className="text-sm">
+            <strong> {message.displayName}: </strong>{" "} {message.text}
           </p>
         ))}
       </div>
+
+      {socketError && (
+        <p className="mb-2 text-sm text-red-500">
+          {socketError}
+        </p>
+      )}
+
       <div className='flex gap-2'>
         <input
           value={draft}
