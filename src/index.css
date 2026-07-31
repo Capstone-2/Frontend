@@ -305,3 +305,10 @@ code {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* user icon style */
+
+.user-icon {
+  border-radius: 50%;/* turns any square image into a circle */
+  object-fit: cover; /* crop each photo to fill, other than squish/stretch */
+}
