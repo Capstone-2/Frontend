@@ -140,7 +140,7 @@ function App() {
               <CreateRoomPage/>
             </ProtectedRoute>
           }/>
-          <Route path='/room/:id' element={
+          <Route path='/rooms/:id' element={
             <ProtectedRoute user={user} isLoading={isLoading} >
               <RoomPage/>
             </ProtectedRoute>
