@@ -1,6 +1,10 @@
+import {useNavigate, useParams} from "react-router";
 import Chatbox from "../components/Chatbox";
 
 function RoomPage(){
+    const navigate = useNavigate()
+    const {id: roomId} = useParams();
+
     return(
         <div className="room-container">
             <div className="left-panel">
@@ -33,6 +37,7 @@ function RoomPage(){
                     <p>User 1: Ready to Study?</p>
                     <p>User 2: Yeah</p>
                 </div>
+                <Chatbox roomId={roomId}/>
 
                 <input
                 type="text"
