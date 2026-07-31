@@ -88,8 +88,7 @@ function App() {
       try {
         const token = await getAccessTokenSilently();
         const dbUser = await syncUser(token, {
-          name:
-            auth0User.name ||
+          username:
             auth0User.nickname ||
             auth0User.email?.split("@")[0] ||
             "Student",

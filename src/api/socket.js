@@ -6,4 +6,4 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 // autoConnect: false — don't open a socket on every page load, only when
 // a user actually enters a room. Chatbox connects/disconnects itself.
-export const socket = io(BASE_URL, { autoConnect: false });
+export const socket = io(BASE_URL, { autoConnect: false, withCredentials: true });
