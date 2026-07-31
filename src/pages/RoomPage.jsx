@@ -1,15 +1,28 @@
 import {useNavigate, useParams} from "react-router";
 import Chatbox from "../components/Chatbox";
+import { useState } from "react";
 
 function RoomPage(){
     const navigate = useNavigate()
     const {id: roomId} = useParams();
 
+    const handleLeaveRoom = () => {
+        const confirmed = window.confirm("Do you wish to leave this room?");
+            if(confirmed){
+                navigate("/") // This navigates to the home page.
+            }
+    };
+
+
     return(
         <div className="room-container">
             <div className="left-panel">
-                <section>
+                <div className="left-panel-header">
                     <h2>Room Information</h2>
+                    <button type="Button" className="leave-room-btn" onClick={handleLeaveRoom}>Leave Room</button>
+                </div>
+
+                <section>
                     <p>Room Name</p>
                     <p>Description</p>
                     <p>Capacity</p>
@@ -17,16 +30,7 @@ function RoomPage(){
 
                 <section>
                     <h2>Users Currently in Room</h2>
-                    <ul>
-                        <li>User 1</li>
-                        <li>User 2</li>
-                        <li>User 3</li>
-                    </ul>
-                </section>
 
-                <section>
-                    <h2>Study Timer</h2>
-                    <button className=""></button>
                 </section>
             </div>
             
@@ -47,7 +51,7 @@ function RoomPage(){
                 <button>Send</button>
             </div>
         </div>
-    );
+    )
 }  
 
 export default RoomPage;
