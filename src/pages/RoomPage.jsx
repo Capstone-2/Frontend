@@ -1,27 +1,46 @@
 import { useNavigate, useParams } from "react-router";
 import { useAuth0 } from "@auth0/auth0-react";
 import Chatbox from "../components/Chatbox";
+import { useState, useEffect } from "react";
 
-
-function RoomPage(){
+function RoomPage() {
     const navigate = useNavigate();
-    const { roomId } = useParams();
+    const params = useParams()
+    const roomId = Number(params.id);
+    const [room, setRoom] = useState({})
     const { user } = useAuth0();
 
     const handleLeaveRoom = () => {
         const confirmed = window.confirm("Do you wish to leave this room?");
-            if(confirmed){
-                navigate("/")
-            }
+        if (confirmed) {
+            navigate("/")
+        }
     };
 
+    useEffect(() => {
+        async function fetchRoom() {
+            try {
+                const allRooms = await fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}`)
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {
+                    return setRoom(data);
+                });
+            } catch (error) {
+                console.error("Error fetching rooms", error);
+                setError(error.message);
+            }
+        }
+        fetchRoom();
+    }, [])
 
-    return(
+    return (
         <div className="room-page">
             <div className="room-topbar">
                 <div className="room-topbar-title">
                     <span className="room-status-dot"/>
-                    <span className="room-title">Room{roomId}</span>
+                    <span className="room-title">Room {roomId}</span>
                 </div>
                 <button type="button" className="leave-room-btn" 
                 onClick={handleLeaveRoom}>Leave Room</button>
@@ -35,11 +54,7 @@ function RoomPage(){
                 </div>
                 
                 <div className="room-chat-panel">
-                    <Chatbox
-                        roomId={roomId}
-                        userId={user?.sub}
-                        displayName={user?.nickname || user?.name}
-                    />
+                    <Chatbox roomId={roomId}/>
                 </div>
             </div>
             
@@ -50,7 +65,6 @@ function RoomPage(){
                     <p>User 1: Ready to Study?</p>
                     <p>User 2: Yeah</p>
                 </div>
-                <Chatbox roomId={roomId}/>
 
                 <input
                 type="text"

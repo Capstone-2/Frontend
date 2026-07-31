@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { createRoom } from "../api/rooms";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useCurrentUser } from "../context/CurrentUserContext";
 
 function CreateRoomPage() {
+  const { user, setUser } = useCurrentUser()
+  const {isAuthenticated: isAuth0User, getAccessTokenSilently} = useAuth0()
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
   const [capacity, setCapacity] = useState(4);
@@ -17,24 +21,27 @@ function CreateRoomPage() {
     setError("");
     setIsSubmitting(true);
 
+    let token = null;
+    if (isAuth0User) {
+      token = await getAccessTokenSilently();
+    }
     try {
-      const newRoom = await createRoom(null, {
-        name: text,
-        description,
+      const newRoom = await createRoom(token, {
+        name: text.trim(),
+        description: description.trim(),
         capacity: Number(capacity),
         password: password || undefined,
       });
 
       console.log(newRoom);
-
       setText("");
       setDescription("");
       setCapacity(4);
       setPassword("");
 
-      navigate(`/room/${newRoom}`);
+      navigate(`/rooms/${newRoom.id}`);
     } catch (error) {
-    //   console.error("Room creation failed:", error.message);
+      // console.error("Room creation failed:", error.message);
       setError(error.message);
     } finally {
       setIsSubmitting(false);
