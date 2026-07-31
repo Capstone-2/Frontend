@@ -1,72 +1,110 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import { createRoom } from "../api/rooms";
 
 function CreateRoomPage() {
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
-  // Optional for images: const [image, setimage] = useState("")
-  const [capacity, setCapacity] = useState("");
+  const [capacity, setCapacity] = useState(4);
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event) {
+  const navigate = useNavigate();
+
+  async function handleSubmit(event) {
     event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
-    const newRoom = {
-      text,
-      description,
-      capacity: Number(capacity),
-      password,
-    };
+    try {
+      const newRoom = await createRoom(null, {
+        name: text,
+        description,
+        capacity: Number(capacity),
+        password: password || undefined,
+      });
 
-    console.log(newRoom);
+      console.log(newRoom);
 
-    setText("");
-    setDescription("");
-    setCapacity("");
-    setPassword("");
+      setText("");
+      setDescription("");
+      setCapacity(4);
+      setPassword("");
+
+      navigate(`/room/${newRoom}`);
+    } catch (error) {
+    //   console.error("Room creation failed:", error.message);
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
-    <div>
-      <h1>Create Study Room</h1>
+    <div className="create-room-page">
+      <h1 className="create-room-title">Create Study Room</h1>
 
-      <form onSubmit={handleSubmit}>
-        <label>Room Name</label>
+      {error && (
+        <p role="alert" className="create-room-error">
+          {error}
+        </p>
+      )}
 
-        <br />
+      <form onSubmit={handleSubmit} className="create-room-form">
+        <div className="form-field">
+          <label htmlFor="name">Room Name</label>
+          <input
+            id="name"
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Enter a room name"
+            required
+          />
+        </div>
 
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Enter a room name"
-        />
+        <div className="form-field">
+          <label htmlFor="description">Description</label>
+          <input
+            id="description"
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter a description"
+          />
+        </div>
 
-        <input
-          type="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter Description"
-        />
+        <div className="form-field">
+          <label htmlFor="capacity">Capacity</label>
+          <select
+            id="capacity"
+            value={capacity}
+            onChange={(e) => setCapacity(e.target.value)}
+          >
+            <option value={2}>2 people</option>
+            <option value={4}>4 people</option>
+            <option value={8}>8 people</option>
+            <option value={16}>16 people</option>
+          </select>
+        </div>
 
-        <input
-        type="number"
-        value={capacity}
-        onChange={(e) => setCapacity(e.target.value)}
-        placeholder="How many people"
-        />
+        <div className="form-field">
+          <label htmlFor="password">Password (optional)</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="4-digit password"
+            maxLength={4}
+          />
+        </div>
 
-        <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="(Optional)Create Password"
-        />
-        
-        <button type="submit">Create Room</button>
+        <button type="submit" className="create-btn" disabled={isSubmitting}>
+          {isSubmitting ? "Creating..." : "Create Room"}
+        </button>
       </form>
-
-      
-      
     </div>
   );
 }

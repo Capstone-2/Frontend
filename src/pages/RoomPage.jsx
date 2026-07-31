@@ -1,37 +1,46 @@
-import {useNavigate, useParams} from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { useAuth0 } from "@auth0/auth0-react";
 import Chatbox from "../components/Chatbox";
-import { useState } from "react";
+
 
 function RoomPage(){
-    const navigate = useNavigate()
-    const {id: roomId} = useParams();
+    const navigate = useNavigate();
+    const { roomId } = useParams();
+    const { user } = useAuth0();
 
     const handleLeaveRoom = () => {
         const confirmed = window.confirm("Do you wish to leave this room?");
             if(confirmed){
-                navigate("/") // This navigates to the home page.
+                navigate("/")
             }
     };
 
 
     return(
-        <div className="room-container">
-            <div className="left-panel">
-                <div className="left-panel-header">
-                    <h2>Room Information</h2>
-                    <button type="Button" className="leave-room-btn" onClick={handleLeaveRoom}>Leave Room</button>
+        <div className="room-page">
+            <div className="room-topbar">
+                <div className="room-topbar-title">
+                    <span className="room-status-dot"/>
+                    <span className="room-title">Room{roomId}</span>
                 </div>
+                <button type="button" className="leave-room-btn" 
+                onClick={handleLeaveRoom}>Leave Room</button>
+            </div>
 
-                <section>
-                    <p>Room Name</p>
-                    <p>Description</p>
-                    <p>Capacity</p>
-                </section>
-
-                <section>
-                    <h2>Users Currently in Room</h2>
-
-                </section>
+            <div className="room-main">
+                <div className="room-content">
+                    <div className="room-content">
+                        Room content placed here
+                    </div>
+                </div>
+                
+                <div className="room-chat-panel">
+                    <Chatbox
+                        roomId={roomId}
+                        userId={user?.sub}
+                        displayName={user?.nickname || user?.name}
+                    />
+                </div>
             </div>
             
             <div className="right-panel">
@@ -51,7 +60,6 @@ function RoomPage(){
                 <button>Send</button>
             </div>
         </div>
-    )
-}  
-
-export default RoomPage;
+    );
+}
+export default RoomPage

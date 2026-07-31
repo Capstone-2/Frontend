@@ -33,8 +33,8 @@ export default function Navbar({ user, onLogout }) {
 
         {/* Only show the protected link once someone is logged in. */}
         {user && (
-          <NavLink to='/protected' className={linkClass}>
-            Protected
+          <NavLink to='/create' className={linkClass}>
+            Create
           </NavLink>
         )}
 
