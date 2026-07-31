@@ -6,7 +6,7 @@ import { socket } from "../api/socket";
 import { getRoomMessages } from "../api/rooms";
 import { useCurrentUser } from "../context/CurrentUserContext";
 
-export default function Chatbox({ roomId }) {
+export default function Chatbox({ roomId, onRoomUsersChange }) {
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [socketError, setSocketError] = useState("");
@@ -51,6 +51,14 @@ export default function Chatbox({ roomId }) {
     function handleChatError(error) {
       console.error("Chat error:", error);
     }
+    
+    function handleRoomUsers(users) {
+      onRoomUsersChange?.(users);
+    }
+
+    function handleSystemMessage(msg) {
+      setMessages((prev) => [...prev, msg]);
+    }
 
     async function connectAuthenticatedSocket() {
       try {
@@ -93,6 +101,8 @@ export default function Chatbox({ roomId }) {
         socket.on("chat-error", handleChatError);
         socket.on("connect", handleConnect)
         socket.on("receive-message", handleReceivedMessage)
+        socket.on("room-users", handleRoomUsers);
+        socket.on("system-message", handleSystemMessage);
         socket.on("connect_error", handleConnectError)
 
         socket.connect()  // Start authenticated connection
@@ -113,11 +123,13 @@ export default function Chatbox({ roomId }) {
 
       socket.off("connect", handleConnect);
       socket.off("receive-message", handleReceivedMessage);
+      socket.off("room-users", handleRoomUsers);
+      socket.off("system-message", handleSystemMessage);
       socket.off("chat-error", handleChatError);
       socket.off("connect_error", handleConnectError)
       socket.disconnect();
     };
-  }, [roomId, user, isAuth0User, isAuth0Loading, getAccessTokenSilently]);
+  }, [roomId, user, isAuth0User, isAuth0Loading, getAccessTokenSilently, onRoomUsersChange]);
 
   function normalizeHistoryMessage(message) {
     return {
@@ -146,11 +158,16 @@ export default function Chatbox({ roomId }) {
         ) : messages.length === 0 ? (
           <p className="text-sm text-(--text-h)"> No messages yet — say hi. </p>
         ) : null}
-        {messages.map((message) => (
-          <p key={message.id} className="text-sm">
-            <strong> {message.displayName}: </strong>{" "} {message.text}
-          </p>
-        ))}
+        {messages.map((message) => message.type === "system" ? (
+            <p key={message.id} className="text-center text-xs italic opacity-70">
+              {message.text}
+            </p>
+          ) : (
+            <p key={message.id} className="text-sm">
+              <strong> {message.displayName}: </strong>{" "} {message.text}
+            </p>
+          )
+        )}
       </div>
 
       {socketError && (

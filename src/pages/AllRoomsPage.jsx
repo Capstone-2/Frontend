@@ -13,7 +13,7 @@ export default function AllRooms() {
   const [image, setImage] = useState("");
   const [capacity, setCapacity] = useState(1);
   const [password, setPassword] = useState("0000");
-  const [error, serError] = useState(null);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
