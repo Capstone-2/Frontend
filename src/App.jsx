@@ -15,6 +15,7 @@ import CreateRoomPage from './pages/CreateRoomPage';
 import RoomPage from './pages/RoomPage';
 import { CurrentUserContext } from './context/CurrentUserContext';
 import AllRoomsPage from "./pages/AllRoomsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // App does two things:
 //   1. maps every URL to a page
@@ -135,6 +136,13 @@ function App() {
           <Route path="/" element={<AllRoomsPage user={user}/>} />
           <Route path='/login' element={<LoginPage setUser={setUser} />} />
           <Route path='/signup' element={<SignUpPage setUser={setUser} />} />
+
+          {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
+          <Route path='/profile' element={
+            <ProtectedRoute user={user} isLoading={isLoading} >
+              <ProfilePage/>
+            </ProtectedRoute>
+          }/>
           <Route path='/create' element={
             <ProtectedRoute user={user} isLoading={isLoading} >
               <CreateRoomPage/>
@@ -145,11 +153,7 @@ function App() {
               <RoomPage/>
             </ProtectedRoute>
           }/>
-          {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
-
-          <Route
-            path='/protected'
-            element={
+          <Route path='/protected' element={
               <ProtectedRoute user={user} isLoading={isLoading}>
                 <ProtectedPage user={user} />
               </ProtectedRoute>
