@@ -88,8 +88,7 @@ function App() {
       try {
         const token = await getAccessTokenSilently();
         const dbUser = await syncUser(token, {
-          name:
-            auth0User.name ||
+          username:
             auth0User.nickname ||
             auth0User.email?.split("@")[0] ||
             "Student",
@@ -133,11 +132,19 @@ function App() {
     <CurrentUserContext.Provider value={{user, setUser}}>
       <Routes>
         <Route element={<Layout user={user} onLogout={handleLogout} authError={authError} />}>
-          <Route path="/" element={<AllRoomsPage />} />
+          <Route path="/" element={<AllRoomsPage user={user}/>} />
           <Route path='/login' element={<LoginPage setUser={setUser} />} />
           <Route path='/signup' element={<SignUpPage setUser={setUser} />} />
-          <Route path='/create' element={<CreateRoomPage/>}/>
-          <Route path='/room' element={<RoomPage/>}/>
+          <Route path='/create' element={
+            <ProtectedRoute user={user} isLoading={isLoading} >
+              <CreateRoomPage/>
+            </ProtectedRoute>
+          }/>
+          <Route path='/room/:id' element={
+            <ProtectedRoute user={user} isLoading={isLoading} >
+              <RoomPage/>
+            </ProtectedRoute>
+          }/>
           {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
 
           <Route

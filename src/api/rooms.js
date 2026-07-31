@@ -1,14 +1,18 @@
 import { request } from "./client";
 
-const authHeader = (token) => ({
-  Authorization: `Bearer ${token}`,
-});
+const authHeader = (token) =>
+  token ? {Authorization: `Bearer ${token}`}: {};
 
 export const getRooms = () =>
   request("/rooms");
 
 export const getRoom = (roomId, token) =>
   request(`/rooms/${roomId}`, {
+    headers: authHeader(token),
+  });
+
+export const getRoomMessages = (roomId, token) =>
+  request(`/rooms/${roomId}/messages`, {
     headers: authHeader(token),
   });
 

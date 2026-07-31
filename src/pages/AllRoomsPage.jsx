@@ -23,7 +23,7 @@ export default function AllRooms() {
   useEffect(() => {
     async function fetchRooms() {
       try {
-        console.log("path:", `${import.meta.env.VITE_API_URL}/rooms`);
+        // console.log("path:", `${import.meta.env.VITE_API_URL}/rooms`);
         const allRooms = await fetch(`${import.meta.env.VITE_API_URL}/rooms`)
           .then((response) => {
             // console.log("res rooms", response);
