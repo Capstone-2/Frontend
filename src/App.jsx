@@ -15,6 +15,7 @@ import CreateRoomPage from './pages/CreateRoomPage';
 import RoomPage from './pages/RoomPage';
 import { CurrentUserContext } from './context/CurrentUserContext';
 import AllRoomsPage from "./pages/AllRoomsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // App does two things:
 //   1. maps every URL to a page
@@ -88,8 +89,7 @@ function App() {
       try {
         const token = await getAccessTokenSilently();
         const dbUser = await syncUser(token, {
-          name:
-            auth0User.name ||
+          username:
             auth0User.nickname ||
             auth0User.email?.split("@")[0] ||
             "Student",
@@ -133,16 +133,27 @@ function App() {
     <CurrentUserContext.Provider value={{user, setUser}}>
       <Routes>
         <Route element={<Layout user={user} onLogout={handleLogout} authError={authError} />}>
-          <Route path="/" element={<AllRoomsPage />} />
+          <Route path="/" element={<AllRoomsPage user={user}/>} />
           <Route path='/login' element={<LoginPage setUser={setUser} />} />
           <Route path='/signup' element={<SignUpPage setUser={setUser} />} />
-          <Route path='/create' element={<CreateRoomPage/>}/>
-          <Route path='/room' element={<RoomPage/>}/>
-          {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
 
-          <Route
-            path='/protected'
-            element={
+          {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
+          <Route path='/profile' element={
+            <ProtectedRoute user={user} isLoading={isLoading} >
+              <ProfilePage/>
+            </ProtectedRoute>
+          }/>
+          <Route path='/create' element={
+            <ProtectedRoute user={user} isLoading={isLoading} >
+              <CreateRoomPage/>
+            </ProtectedRoute>
+          }/>
+          <Route path='/rooms/:id' element={
+            <ProtectedRoute user={user} isLoading={isLoading} >
+              <RoomPage/>
+            </ProtectedRoute>
+          }/>
+          <Route path='/protected' element={
               <ProtectedRoute user={user} isLoading={isLoading}>
                 <ProtectedPage user={user} />
               </ProtectedRoute>

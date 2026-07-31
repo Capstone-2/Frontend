@@ -27,9 +27,11 @@ export default function Navbar({ user, onLogout }) {
         <NavLink to="/" end className={linkClass}>
           Home
         </NavLink>
-        <NavLink to="/tasks" className={linkClass}>
-          Profile
-        </NavLink>
+        {user && (
+          <NavLink to="/profile" className={linkClass}>
+            Profile
+          </NavLink>
+        )}
 
         {/* Only show the protected link once someone is logged in. */}
         {user && (
@@ -44,7 +46,7 @@ export default function Navbar({ user, onLogout }) {
             <span className='px-2 text-sm'>
               {/* Our own users always have a username; Auth0 users may also
                   have a name or email worth falling back to. */}
-              {user.username || user.name || user.email}
+              {user.username || user.email}
             </span>
             <button
               onClick={onLogout}

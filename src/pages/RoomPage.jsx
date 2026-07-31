@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useAuth0 } from "@auth0/auth0-react";
 import Chatbox from "../components/Chatbox";
@@ -6,8 +6,10 @@ import { startSession, endSession } from "../api/sessions";
 
 function RoomPage() {
   const navigate = useNavigate();
-  const { roomId } = useParams();
   const { user } = useAuth0();
+  const params = useParams()
+  const roomId = Number(params.id);
+  const [room, setRoom] = useState({})
 
   const [sessionId, setSessionId] = useState(null);
   const [sessionError, setSessionError] = useState("");
@@ -47,6 +49,24 @@ function RoomPage() {
     if (confirmed) {
       navigate("/");
     }
+    
+    useEffect(() => {
+        async function fetchRoom() {
+            try {
+                const allRooms = await fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}`)
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {
+                    return setRoom(data);
+                });
+            } catch (error) {
+                console.error("Error fetching rooms", error);
+                setError(error.message);
+            }
+        }
+        fetchRoom();
+    }, [])
   };
 
   return (
@@ -80,14 +100,12 @@ function RoomPage() {
               </button>
             )}
           </div>
+          
+          
         </div>
 
         <div className="room-chat-panel">
-          <Chatbox
-            roomId={roomId}
-            userId={user?.sub}
-            displayName={user?.nickname || user?.name}
-          />
+          <Chatbox roomId={roomId}/>
         </div>
       </div>
     </div>
