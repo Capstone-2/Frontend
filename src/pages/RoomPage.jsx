@@ -4,10 +4,14 @@ import { useAuth0 } from "@auth0/auth0-react";
 import Chatbox from "../components/Chatbox";
 import { startSession, endSession } from "../api/sessions";
 import { useCamera } from "../hooks/useCamera";
+import { useWebRTC } from "../hooks/useWebRTC";
+import { useCurrentUser } from "../context/CurrentUserContext";
 
 function RoomPage() {
   const navigate = useNavigate();
-  const { user } = useAuth0();
+  // const { user } = useAuth0();
+  const { user: auth0User } = useAuth0();
+const { user: currentUser } = useCurrentUser();
   const params = useParams()
   const roomId = Number(params.id);
   const [room, setRoom] = useState({})
@@ -17,6 +21,7 @@ function RoomPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { localStream, error: error, turnOnCamera, turnOffCamera } = useCamera();
+  const { remoteStreams } = useWebRTC(localStream, currentUser?.id);
 
   async function handleStartSession() {
     setSessionError("");
@@ -115,20 +120,34 @@ function RoomPage() {
       </div>
 
 
-    <div>
+   <div>
   <button onClick={turnOnCamera}>Turn on camera</button>
   <button onClick={turnOffCamera}>Turn off camera</button>
   {error && <p>{error}</p>}
-  {localStream && (
-    <video
-      autoPlay
-      muted
-      ref={(video) => {
-        if (video) video.srcObject = localStream;
-      }}
-      style={{ width: 200 }}
-    />
-  )}
+
+  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+    {localStream && (
+      <video
+        autoPlay
+        muted
+        ref={(video) => {
+          if (video) video.srcObject = localStream;
+        }}
+        style={{ width: 200 }}
+      />
+    )}
+
+    {Object.entries(remoteStreams).map(([peerUserId, stream]) => (
+      <video
+        key={peerUserId}
+        autoPlay
+        ref={(video) => {
+          if (video) video.srcObject = stream;
+        }}
+        style={{ width: 200 }}
+      />
+    ))}
+  </div>
 </div>
 
     </div>
