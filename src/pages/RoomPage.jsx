@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { useAuth0 } from "@auth0/auth0-react";
 import Chatbox from "../components/Chatbox";
 import { startSession, endSession } from "../api/sessions";
+import { useCamera } from "../hooks/useCamera";
 
 function RoomPage() {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ function RoomPage() {
   const [sessionId, setSessionId] = useState(null);
   const [sessionError, setSessionError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { localStream, error: error, turnOnCamera, turnOffCamera } = useCamera();
 
   async function handleStartSession() {
     setSessionError("");
@@ -104,10 +107,30 @@ function RoomPage() {
           
         </div>
 
+
+
         <div className="room-chat-panel">
           <Chatbox roomId={roomId}/>
         </div>
       </div>
+
+
+    <div>
+  <button onClick={turnOnCamera}>Turn on camera</button>
+  <button onClick={turnOffCamera}>Turn off camera</button>
+  {error && <p>{error}</p>}
+  {localStream && (
+    <video
+      autoPlay
+      muted
+      ref={(video) => {
+        if (video) video.srcObject = localStream;
+      }}
+      style={{ width: 200 }}
+    />
+  )}
+</div>
+
     </div>
   );
 }
