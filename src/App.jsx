@@ -8,14 +8,15 @@ import TaskDetailPage from "./pages/TaskDetailPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedPage from "./pages/ProtectedPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { getMe, syncUser, logoutRequest } from './api/auth';
-import LoginPage from './pages/LoginPage'
-import SignUpPage from './pages/SignUpPage'
-import CreateRoomPage from './pages/CreateRoomPage';
-import RoomPage from './pages/RoomPage';
-import { CurrentUserContext } from './context/CurrentUserContext';
+import { getMe, syncUser, logoutRequest } from "./api/auth";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import CreateRoomPage from "./pages/CreateRoomPage";
+import RoomPage from "./pages/RoomPage";
+import { CurrentUserContext } from "./context/CurrentUserContext";
 import AllRoomsPage from "./pages/AllRoomsPage";
 import ProfilePage from "./pages/ProfilePage";
+import UsersList from "./pages/UsersList";
 
 // App does two things:
 //   1. maps every URL to a page
@@ -34,14 +35,14 @@ function App() {
   // our database. Without this the app would sit on "Checking your session…"
   // forever, waiting for a `user` that is never coming.
   const [authError, setAuthError] = useState(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const {
     isAuthenticated: isAuth0User,
     user: auth0User,
     isLoading: isAuth0Loading,
     getAccessTokenSilently,
-    logout: auth0Logout
+    logout: auth0Logout,
   } = useAuth0();
 
   // On a page refresh, THREE things can be in flight at once, and
@@ -56,7 +57,8 @@ function App() {
   // finishes almost instantly with user === null. Without waiting for the sync
   // below, there'd be a window where nothing is "loading" but nobody is logged
   // in either — and that window is exactly when the redirect fires.
-  const isLoading = isCheckingSession || isAuth0Loading || (isAuth0User && !user && !authError);
+  const isLoading =
+    isCheckingSession || isAuth0Loading || (isAuth0User && !user && !authError);
 
   // ---------- 1. on page load: are we already logged in? ----------
   // Our JWT lives in an httpOnly cookie. That cookie survives a refresh, but
@@ -83,29 +85,28 @@ function App() {
   // findOrCreate on the backend, so the first social login CREATES their row
   // and every login after that just returns it.
   useEffect(() => {
-    if (!isAuth0User || !auth0User) return
+    if (!isAuth0User || !auth0User) return;
 
     async function saveAuth0User() {
       try {
         const token = await getAccessTokenSilently();
         const dbUser = await syncUser(token, {
           username:
-            auth0User.nickname ||
-            auth0User.email?.split("@")[0] ||
-            "Student",
+            auth0User.nickname || auth0User.email?.split("@")[0] || "Student",
           email: auth0User.email,
         });
         setUser(dbUser);
         setAuthError(null);
       } catch (error) {
-        console.error('Could not sync user:', error.message);
-        setAuthError(`Signed in with Auth0, but we couldn't load your account: ${error.message}`)
+        console.error("Could not sync user:", error.message);
+        setAuthError(
+          `Signed in with Auth0, but we couldn't load your account: ${error.message}`,
+        );
       }
-    };
+    }
 
     saveAuth0User();
   }, [isAuth0User, auth0User, getAccessTokenSilently]);
-
 
   // ---------- logging out ----------
   // We can't delete an httpOnly cookie from JavaScript, so logging out HAS to
@@ -114,11 +115,11 @@ function App() {
   async function handleLogout() {
     try {
       await logoutRequest();
-      navigate("/")
+      navigate("/");
     } catch (error) {
       // Even if the request fails, still drop the user locally — staying
       // "logged in" on screen after clicking Log out is the worse outcome.
-      console.error('Logout failed:', error.message);
+      console.error("Logout failed:", error.message);
     }
 
     setUser(null);
@@ -130,39 +131,55 @@ function App() {
   }
 
   return (
-    <CurrentUserContext.Provider value={{user, setUser}}>
+    <CurrentUserContext.Provider value={{ user, setUser }}>
       <Routes>
-        <Route element={<Layout user={user} onLogout={handleLogout} authError={authError} />}>
-          <Route path="/" element={<AllRoomsPage user={user}/>} />
-          <Route path='/login' element={<LoginPage setUser={setUser} />} />
-          <Route path='/signup' element={<SignUpPage setUser={setUser} />} />
+        <Route
+          element={
+            <Layout user={user} onLogout={handleLogout} authError={authError} />
+          }
+        >
+          <Route path="/" element={<AllRoomsPage user={user} />} />
+          <Route path="/users" element={<UsersList />} />
+          <Route path="/login" element={<LoginPage setUser={setUser} />} />
+          <Route path="/signup" element={<SignUpPage setUser={setUser} />} />
 
           {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
-          <Route path='/profile' element={
-            <ProtectedRoute user={user} isLoading={isLoading} >
-              <ProfilePage/>
-            </ProtectedRoute>
-          }/>
-          <Route path='/create' element={
-            <ProtectedRoute user={user} isLoading={isLoading} >
-              <CreateRoomPage/>
-            </ProtectedRoute>
-          }/>
-          <Route path='/rooms/:id' element={
-            <ProtectedRoute user={user} isLoading={isLoading} >
-              <RoomPage/>
-            </ProtectedRoute>
-          }/>
-          <Route path='/protected' element={
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute user={user} isLoading={isLoading}>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create"
+            element={
+              <ProtectedRoute user={user} isLoading={isLoading}>
+                <CreateRoomPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rooms/:id"
+            element={
+              <ProtectedRoute user={user} isLoading={isLoading}>
+                <RoomPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/protected"
+            element={
               <ProtectedRoute user={user} isLoading={isLoading}>
                 <ProtectedPage user={user} />
               </ProtectedRoute>
             }
           />
-          <Route path='*' element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
-    </CurrentUserContext.Provider> 
+    </CurrentUserContext.Provider>
   );
 }
 

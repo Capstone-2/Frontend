@@ -312,3 +312,12 @@ code {
   border-radius: 50%;/* turns any square image into a circle */
   object-fit: cover; /* crop each photo to fill, other than squish/stretch */
 }
+
+.user-list{
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content:space-around;
+  border: 1px dashed var(--border);
+  gap: 5rem;
+}
