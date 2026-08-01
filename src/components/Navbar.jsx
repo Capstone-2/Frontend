@@ -20,13 +20,21 @@ export default function Navbar({ user, onLogout }) {
           to="/"
           className="mr-auto text-lg font-semibold text-(--text-h)"
         >
-          📚Studying Room
+          📚Study Room
         </NavLink>
 
         {/* `end` makes "Home" active only on "/" exactly, not on every route. */}
         <NavLink to="/" end className={linkClass}>
           Home
         </NavLink>
+
+        {/* Show the public user list. */}
+        {
+          <NavLink to="/users" className={linkClass}>
+            Users
+          </NavLink>
+        }
+
         {user && (
           <NavLink to="/profile" className={linkClass}>
             Profile
@@ -35,7 +43,7 @@ export default function Navbar({ user, onLogout }) {
 
         {/* Only show the protected link once someone is logged in. */}
         {user && (
-          <NavLink to='/create' className={linkClass}>
+          <NavLink to="/create" className={linkClass}>
             Create
           </NavLink>
         )}
@@ -43,26 +51,26 @@ export default function Navbar({ user, onLogout }) {
         {/* Auth controls: your name + Log out, or the Log in / Sign up pair. */}
         {user ? (
           <>
-            <span className='px-2 text-sm'>
+            <span className="px-2 text-sm">
               {/* Our own users always have a username; Auth0 users may also
                   have a name or email worth falling back to. */}
               {user.username || user.email}
             </span>
             <button
               onClick={onLogout}
-              className='rounded-md px-3 py-2 text-sm font-medium hover:text-(--text-h)'
+              className="rounded-md px-3 py-2 text-sm font-medium hover:text-(--text-h)"
             >
               Log out
             </button>
           </>
         ) : (
           <>
-            <NavLink to='/login' className={linkClass}>
+            <NavLink to="/login" className={linkClass}>
               Log in
             </NavLink>
             <NavLink
-              to='/signup'
-              className='rounded-md bg-(--accent) px-3 py-2 text-sm font-medium text-white'
+              to="/signup"
+              className="rounded-md bg-(--accent) px-3 py-2 text-sm font-medium text-white"
             >
               Sign up
             </NavLink>
