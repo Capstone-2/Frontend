@@ -260,7 +260,7 @@ code {
 }
 
 .presence-dot.is-full {
-  background: #ff0000;
+  background: #ff6060;
   box-shadow:
     0 0 6px rgba(34, 197, 94, 0.45);
 }
