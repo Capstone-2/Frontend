@@ -151,15 +151,15 @@ export default function Chatbox({ roomId, onRoomUsersChange }) {
   }
 
   return (
-    <div className='mx-auto max-w-md rounded-md border border-(--border) p-4 text-left'>
-      <div className='mb-3 max-h-60 space-y-1 overflow-y-auto'>
+    <div className='chatbox'>
+      <div className='chatbox-messages'>
         {isLoadingHistory ? (
-          <p className="text-sm text-(--text-h)"> Loading messages... </p>
+          <p className="chat-empty-message"> Loading messages... </p>
         ) : messages.length === 0 ? (
-          <p className="text-sm text-(--text-h)"> No messages yet — say hi. </p>
+          <p className="chat-empty-message"> No messages yet — say hi. </p>
         ) : null}
         {messages.map((message) => message.type === "system" ? (
-            <p key={message.id} className="text-center text-xs italic opacity-70">
+            <p key={message.id} className="chat-empty-message">
               {message.text}
             </p>
           ) : (
@@ -171,12 +171,12 @@ export default function Chatbox({ roomId, onRoomUsersChange }) {
       </div>
 
       {socketError && (
-        <p className="mb-2 text-sm text-red-500">
+        <p className="chat-error">
           {socketError}
         </p>
       )}
 
-      <div className='flex gap-2'>
+      <div className='chatbox-input-row'>
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
