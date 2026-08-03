@@ -1,3 +1,4 @@
+import { Navigate } from "react-router";
 import UserIcon from "../components/UserIcon";
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "../context/CurrentUserContext";
@@ -16,6 +17,7 @@ export default function UserList() {
   const { user: currentUser } = useCurrentUser();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
+  const [totalStudyTime, setTotalStudyTime] = useState();
 
   useEffect(() => {
     async function fetchUsers() {
@@ -51,6 +53,23 @@ export default function UserList() {
 
   function isCurrentUser(user) {
     return Number(user.id) === Number(currentUser?.id);
+  }
+
+  function formaStudyTime(user) {
+    const seconds = user.totalStudyTime;
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    /*floor: give biggest integer not bigger the number itself */
+
+    if (hours > 0 && minutes > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    if (hours > 0 && minutes == 0) {
+      return `${hours}h`;
+    }
+
+    return `${minutes}m`;
   }
 
   return (
