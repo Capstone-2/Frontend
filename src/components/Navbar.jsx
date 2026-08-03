@@ -28,19 +28,6 @@ export default function Navbar({ user, onLogout }) {
           Home
         </NavLink>
 
-        {/* Show the public user list. */}
-        {
-          <NavLink to="/users" className={linkClass}>
-            Users
-          </NavLink>
-        }
-
-        {user && (
-          <NavLink to="/profile" className={linkClass}>
-            Profile
-          </NavLink>
-        )}
-
         {/* Only show the protected link once someone is logged in. */}
         {user && (
           <NavLink to="/create" className={linkClass}>
@@ -48,14 +35,26 @@ export default function Navbar({ user, onLogout }) {
           </NavLink>
         )}
 
+        {/* Show the public user list. */}
+        {user && (
+          <NavLink to="/users" className={linkClass}>
+            Users
+          </NavLink>
+        )}
+
+        {user && (
+          <NavLink to="/profile" className={linkClass}>
+            Profile
+          </NavLink>
+        )}
+
         {/* Auth controls: your name + Log out, or the Log in / Sign up pair. */}
         {user ? (
           <>
-            <span className="px-2 text-sm">
-              {/* Our own users always have a username; Auth0 users may also
-                  have a name or email worth falling back to. */}
+            {/* Our own users always have a username; Auth0 users may also have a name or email worth falling back to. */}
+            {/*<span className="px-2 text-sm">
               {user.username || user.email}
-            </span>
+            </span>*/}
             <button
               onClick={onLogout}
               className="rounded-md px-3 py-2 text-sm font-medium hover:text-(--text-h)"

@@ -1,8 +1,19 @@
 import UserIcon from "../components/UserIcon";
 import { useState, useEffect } from "react";
+import { useCurrentUser } from "../context/CurrentUserContext";
 // import { getUsers } from "../api/users"; // object {}
 
+function formatTime(totalSeconds) {
+    const seconds = Number(totalSeconds) || 0
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+
+    if (hours === 0) { return `${minutes}m`}
+    return `${hours}h ${minutes}m`
+}
+
 export default function UserList() {
+  const { user: currentUser } = useCurrentUser();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
 
@@ -20,28 +31,96 @@ export default function UserList() {
     fetchUsers();
   }, []);
 
-  console.log("users: ", users);
+  // console.log("users: ", users);
+  const rankedUsers = [...users].sort((firstUser, secondUser) => {
+    const firstTime = Number(firstUser.totalStudyTime) || 0;
+    const secondTime = Number(secondUser.totalStudyTime) || 0;
+
+    if (secondTime !== firstTime) {
+      return secondTime - firstTime;
+    }
+
+    const firstName = firstUser.displayName || firstUser.username || "";
+    const secondName = secondUser.displayName || secondUser.username || "";
+    return firstName.localeCompare(secondName);
+  });
+
+  function getRankLabel(index) {
+    return ["1st", "2nd", "3rd"][index] || null;
+  }
+
+  function isCurrentUser(user) {
+    return Number(user.id) === Number(currentUser?.id);
+  }
 
   return (
-    <div>
-      <h1>User List</h1>
-      <div>
-        {users.length === 0 ? (
-          <p>No users available yet.</p>
-        ) : (
-          users.map((user) => (
-            <div key={user.id} className="user-list">
-              <p>{user.displayName}</p>
-              <ol>{user.totalStudyTime}</ol>
-              {<UserIcon user />}
-              <p>{user.school}</p>
-              <button> ➕ </button>
-            </div>
-          ))
-        )}
-      </div>
+    <section className="users-page">
+      <header className="users-page-header">
+        <h1>User List</h1>
+        <p> View other students and see how much time they have spent studying.</p>
+      </header>
 
-      {/* <UserIcon {user}/> */}
-    </div>
+      {error && (
+        <p role="alert" className="users-page-error">
+          {error}
+        </p>
+      )}
+
+      {users.length === 0 ? (
+        <div className="users-empty-state">
+          <h2>No users available yet</h2>
+          <p>New members will appear here after creating an account.</p>
+        </div>
+      ) : (
+        <div className="users-table">
+          <div className="users-table-header">
+            <span>Profile</span>
+            <span>User</span>
+            <span>Study time</span>
+            <span>School</span>
+            <span className="users-actions-heading"> + Friend </span>
+          </div>
+
+          <div className="users-table-body">
+            {users.map((user) => (
+              <article key={user.id} className="user-row">
+                <div className="user-avatar-cell">
+                  <UserIcon
+                    user={user}
+                    size={46}
+                  />
+                </div>
+
+                <div className="user-identity-cell">
+                  <strong> {user.displayName || user.username} </strong>
+                  {user.displayName && user.displayName !== user.username && (
+                      <span>
+                        @{user.username}
+                      </span>
+                    )}
+                </div>
+
+                <span className="user-time-cell">
+                  {formatTime(user.totalStudyTime)}
+                </span>
+
+                <span className="user-school-cell">
+                  {user.school || "Not listed"}
+                </span>
+
+                <button
+                  type="button"
+                  className="user-add-btn"
+                  aria-label={`Add ${user.displayName || user.username}`}
+                  title="Add user"
+                >
+                  +
+                </button>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
