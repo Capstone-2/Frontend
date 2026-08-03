@@ -313,11 +313,41 @@ code {
   object-fit: cover; /* crop each photo to fill, other than squish/stretch */
 }
 
-.user-list{
+/* Users List Page */
+
+/* .user-list{
   display: flex;
   height: 100%;
   align-items: center;
-  justify-content:space-around;
+  justify-content:space-evenly;
   border: 1px dashed var(--border);
   gap: 5rem;
+  padding:8px;
+} */
+
+.center{
+  display: flex;
+  justify-content: center;
+}
+
+table {
+  width: 100%;
+  text-align: center;
+}
+
+thead{
+  background-color: #dac0f3;
+  
+}
+
+tr{
+  border:1px dashed rgb(200, 178, 228);
+  width:100%;
+  height:100%;
+}
+
+td{
+  align-items: center;
+  gap: 0.5rem;
+ 
 }
