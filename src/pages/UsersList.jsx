@@ -33,7 +33,6 @@ export default function UserList() {
     fetchUsers();
   }, []);
 
-  // console.log("users: ", users);
   const rankedUsers = [...users].sort((firstUser, secondUser) => {
     const firstTime = Number(firstUser.totalStudyTime) || 0;
     const secondTime = Number(secondUser.totalStudyTime) || 0;
@@ -48,28 +47,11 @@ export default function UserList() {
   });
 
   function getRankLabel(index) {
-    return ["1st", "2nd", "3rd"][index] || null;
+    return index < 10 ? index + 1 : null;
   }
 
   function isCurrentUser(user) {
     return Number(user.id) === Number(currentUser?.id);
-  }
-
-  function formaStudyTime(user) {
-    const seconds = user.totalStudyTime;
-
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    /*floor: give biggest integer not bigger the number itself */
-
-    if (hours > 0 && minutes > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    if (hours > 0 && minutes == 0) {
-      return `${hours}h`;
-    }
-
-    return `${minutes}m`;
   }
 
   return (
@@ -85,7 +67,7 @@ export default function UserList() {
         </p>
       )}
 
-      {users.length === 0 ? (
+      {rankedUsers.length === 0 ? (
         <div className="users-empty-state">
           <h2>No users available yet</h2>
           <p>New members will appear here after creating an account.</p>
@@ -93,6 +75,7 @@ export default function UserList() {
       ) : (
         <div className="users-table">
           <div className="users-table-header">
+            <span className="user-rank-heading">Rank</span>
             <span>Profile</span>
             <span>User</span>
             <span>Study time</span>
@@ -101,42 +84,53 @@ export default function UserList() {
           </div>
 
           <div className="users-table-body">
-            {users.map((user) => (
-              <article key={user.id} className="user-row">
-                <div className="user-avatar-cell">
-                  <UserIcon
-                    user={user}
-                    size={46}
-                  />
-                </div>
+            {rankedUsers.map((user, index) => {
+              const rank = getRankLabel(index);
 
-                <div className="user-identity-cell">
-                  <strong> {user.displayName || user.username} </strong>
-                  {user.displayName && user.displayName !== user.username && (
-                      <span>
-                        @{user.username}
-                      </span>
-                    )}
-                </div>
-
-                <span className="user-time-cell">
-                  {formatTime(user.totalStudyTime)}
-                </span>
-
-                <span className="user-school-cell">
-                  {user.school || "Not listed"}
-                </span>
-
-                <button
-                  type="button"
-                  className="user-add-btn"
-                  aria-label={`Add ${user.displayName || user.username}`}
-                  title="Add user"
+              return (
+                <article
+                  key={user.id}
+                  className={`user-row${isCurrentUser(user) ? " user-row-current" : ""}`}
                 >
-                  +
-                </button>
-              </article>
-            ))}
+                  <span className="user-rank-cell">
+                    {rank !== null ? rank : "-"}
+                  </span>
+
+                  <div className="user-avatar-cell">
+                    <UserIcon
+                      user={user}
+                      size={46}
+                    />
+                  </div>
+
+                  <div className="user-identity-cell">
+                    <strong> {user.displayName || user.username} </strong>
+                    {user.displayName && user.displayName !== user.username && (
+                        <span>
+                          @{user.username}
+                        </span>
+                      )}
+                  </div>
+
+                  <span className="user-time-cell">
+                    {formatTime(user.totalStudyTime)}
+                  </span>
+
+                  <span className="user-school-cell">
+                    {user.school || "Not listed"}
+                  </span>
+
+                  <button
+                    type="button"
+                    className="user-add-btn"
+                    aria-label={`Add ${user.displayName || user.username}`}
+                    title="Add user"
+                  >
+                    +
+                  </button>
+                </article>
+              );
+            })}
           </div>
         </div>
       )}

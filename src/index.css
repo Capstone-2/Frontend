@@ -265,6 +265,23 @@ code {
     0 0 6px rgba(34, 197, 94, 0.45);
 }
 
+.room-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #dc2626;
+}
+
+.room-delete-btn:hover:not(:disabled){
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
 @media (max-width: 700px) {
   .rooms {
     grid-template-columns: 1fr;
