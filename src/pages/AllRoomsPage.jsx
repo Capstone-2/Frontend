@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { deleteRoom } from "../api/rooms";
+import { useCurrentUser } from "../context/CurrentUserContext";
 /* link: won't reload the page, <a>tag will reload
 useNavigate: manually redirect user to other pages
 useEffect: a function to load once */
@@ -15,8 +17,10 @@ export default function AllRooms() {
   const [password, setPassword] = useState("0000");
   const [error, setError] = useState(null);
   const [roomPresence, setRoomPresence] = useState({});
+  const [deletingRoomId, setDeletingRoomId] = useState(null);
 
   const navigate = useNavigate();
+  const { token } = useCurrentUser();
 
   //load all rooms
   //runs when "all rooms" button clicked
@@ -85,12 +89,36 @@ export default function AllRooms() {
     navigate(`/rooms/${room.id}`);
   }
 
+  async function handleDeleteRoom(room) {
+    const confirmed = window.confirm(`Delete "${room.name}"? This can't be undone.`);
+    if (!confirmed) return;
+
+    setDeletingRoomId(room.id);
+    setError(null);
+
+    try {
+      await deleteRoom(token, room.id);
+      setRooms((prevRooms) => prevRooms.filter((r) => r.id !== room.id));
+    } catch (error) {
+      setError(error.message || "Failed to delete a room.");
+    } finally {
+      setDeletingRoomId(null);
+    }
+  }
+
   return (
     <div>
       <header className="rooms-page-header">
         <h1>All Rooms</h1>
         <p> Choose a study room, study with other students, and begin a focused session. </p>
       </header>
+
+      {error && (
+        <p role="alert" className="rooms-page-error">
+          {error}
+        </p>
+      )}
+
       <div className="rooms">
         {rooms.length === 0 ? (
           <p>No rooms available yet.</p>
@@ -99,6 +127,7 @@ export default function AllRooms() {
             const users = roomPresence[room.id] || [];
             const currentUserCount = users.length;
             const isFull = currentUserCount >= room.capacity;
+            const isDeleting = deletingRoomId === room.id;
             return (
               <div key={room.id} className="room-card-content">
                 <div className="room-card">
@@ -120,11 +149,18 @@ export default function AllRooms() {
                     <span> {isFull ? `Room Full · ${currentUserCount} / ${room.capacity}` : `${currentUserCount} / ${room.capacity} Studying`}
                     </span>
                   </div>
-                  {/* <div>
-                    <button onClick={() => navigate(`/rooms/${room.id}`)}>
-                      Delete
-                    </button> 
-                  </div>*/}
+
+                  <div>
+                    <button
+                      type="button"
+                      className="room-delete-btn"
+                      onClick={() => handleDeleteRoom(room)}
+                      disabled={isDeleting}
+                      aria-label={`Delete ${room.name}`}
+                    >
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
                 </div>
 
               </div>
